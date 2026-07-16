@@ -1,23 +1,22 @@
 {
   "name": "devflow-ai",
-  "version": "1.0.0",
-  "description": "AI-powered developer collaboration and project management platform with intelligent task scheduling, real-time collaboration, and advanced data structures.",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI-powered developer collaboration and project management platform.",
+  "packageManager": "pnpm@11.13.1",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "turbo run format"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/urwashi-kumari/devflow-ai.git"
+    "url": "https://github.com/urwashi-kumari/devflow-ai.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/urwashi-kumari/devflow-ai/issues"
-  },
-  "homepage": "https://github.com/urwashi-kumari/devflow-ai#readme"
+  "author": "Urwashi Kumari",
+  "license": "MIT",
+  "devDependencies": {
+    "turbo": "^2.10.5"
+  }
 }
