@@ -1,0 +1,23 @@
+{
+  "name": "devflow-ai",
+  "version": "1.0.0",
+  "description": "AI-powered developer collaboration and project management platform with intelligent task scheduling, real-time collaboration, and advanced data structures.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/urwashi-kumari/devflow-ai.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/urwashi-kumari/devflow-ai/issues"
+  },
+  "homepage": "https://github.com/urwashi-kumari/devflow-ai#readme"
+}
