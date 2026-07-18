@@ -8,6 +8,8 @@ import { ProjectsModule } from './modules/projects/projects.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { WorkspaceModule } from './modules/workspace/workspace.module';
 import { HealthModule } from './modules/health/health.module';
+import { UsersModule } from './modules/users/users.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { HealthModule } from './modules/health/health.module';
     AiModule,
     NotificationsModule,
     HealthModule,
+    UsersModule,
+    PrismaModule,
   ],
 })
 export class AppModule {}
