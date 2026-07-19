@@ -19,13 +19,20 @@ enum TaskPriority {
   HIGH
 }
 
+enum ProjectRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
 model User {
   id       String @id @default(cuid())
   name     String
   email    String @unique
   password String
 
-  projects Project[]
+  projects    Project[]
+  memberships ProjectMember[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -41,7 +48,8 @@ model Project {
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  tasks Task[]
+  tasks   Task[]
+  members ProjectMember[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -73,11 +81,26 @@ model TaskDependency {
   taskId          String
   dependsOnTaskId String
 
-  task Task @relation("TaskDependencies", fields: [taskId], references: [id], onDelete: Cascade)
-
+  task      Task @relation("TaskDependencies", fields: [taskId], references: [id], onDelete: Cascade)
   dependsOn Task @relation("TaskDependents", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
   @@unique([taskId, dependsOnTaskId])
+}
+
+model ProjectMember {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  role ProjectRole @default(MEMBER)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, projectId])
 }
