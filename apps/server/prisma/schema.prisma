@@ -73,6 +73,8 @@ model Task {
   dependents   TaskDependency[] @relation("TaskDependents")
 
   comments Comment[]
+  attachments Attachment[]
+
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -121,4 +123,17 @@ model Comment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Attachment {
+  id       String @id @default(cuid())
+
+  fileName String
+  fileUrl  String
+  fileSize Int?
+
+  taskId String
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  uploadedAt DateTime @default(now())
 }
