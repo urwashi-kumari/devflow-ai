@@ -16,8 +16,4 @@ export class CreateProjectDto {
   @IsOptional()
   @IsString()
   githubBranch?: string;
-
-  @IsOptional()
-  @IsString()
-  organizationId?: string;
 }

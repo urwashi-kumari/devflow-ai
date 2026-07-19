@@ -14,7 +14,6 @@ export class ProjectsService {
         description: dto.description,
         githubRepo: dto.githubRepo,
         githubBranch: dto.githubBranch,
-        organizationId: dto.organizationId,
         ownerId: userId,
       },
     });

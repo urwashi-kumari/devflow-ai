@@ -7,11 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  USER
-  ADMIN
-}
-
 enum TaskStatus {
   TODO
   IN_PROGRESS
@@ -25,96 +20,64 @@ enum TaskPriority {
 }
 
 model User {
-  id             String               @id @default(cuid())
-  name           String
-  email          String               @unique
-  password       String
-  role           UserRole             @default(USER)
-  isVerified     Boolean              @default(false)
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  password String
 
-  organizations  OrganizationMember[]
-  projects       Project[]
-}
+  projects Project[]
 
-model Organization {
-  id          String               @id @default(cuid())
-  name        String
-  slug        String               @unique
-  description String?
-
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-
-  members     OrganizationMember[]
-  projects    Project[]
-}
-
-model OrganizationMember {
-  id             String        @id @default(cuid())
-
-  userId         String
-  organizationId String
-  role           String        @default("MEMBER")
-
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  createdAt      DateTime      @default(now())
-
-  @@unique([userId, organizationId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Project {
-  id              String           @id @default(cuid())
-  name            String
-  description     String?
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  githubRepo   String?
+  githubBranch String?
 
-  githubRepo      String?
-  githubBranch    String?
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  ownerId         String
-  organizationId  String?
+  tasks Task[]
 
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-
-  owner           User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  organization    Organization?    @relation(fields: [organizationId], references: [id])
-
-  tasks           Task[]
-  aiChats         AIConversation[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Task {
-  id          String        @id @default(cuid())
-
+  id          String  @id @default(cuid())
   title       String
   description String?
 
-  status      TaskStatus    @default(TODO)
-  priority    TaskPriority  @default(MEDIUM)
+  status   TaskStatus   @default(TODO)
+  priority TaskPriority @default(MEDIUM)
 
-  dueDate     DateTime?
+  dueDate DateTime?
 
-  projectId   String
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  dependencies TaskDependency[] @relation("TaskDependencies")
+  dependents   TaskDependency[] @relation("TaskDependents")
 
-  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model AIConversation {
-  id         String    @id @default(cuid())
+model TaskDependency {
+  id String @id @default(cuid())
 
-  projectId  String
+  taskId          String
+  dependsOnTaskId String
 
-  prompt     String    @db.Text
-  response   String    @db.Text
+  task Task @relation("TaskDependencies", fields: [taskId], references: [id], onDelete: Cascade)
 
-  createdAt  DateTime  @default(now())
+  dependsOn Task @relation("TaskDependents", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
 
-  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([taskId, dependsOnTaskId])
 }

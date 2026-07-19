@@ -10,6 +10,8 @@ import { WorkspaceModule } from './modules/workspace/workspace.module';
 import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
+//import { TaskDependenciesModule } from './task-dependencies/task-dependencies.module';
+import { TaskDependenciesModule } from './modules/task-dependencies/task-dependencies.module';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { PrismaModule } from './prisma/prisma.module';
     HealthModule,
     UsersModule,
     PrismaModule,
+    TaskDependenciesModule,
   ],
 })
 export class AppModule {}
