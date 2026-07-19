@@ -13,6 +13,7 @@ import { PrismaModule } from './prisma/prisma.module';
 //import { TaskDependenciesModule } from './task-dependencies/task-dependencies.module';
 import { TaskDependenciesModule } from './modules/task-dependencies/task-dependencies.module';
 import { ProjectMembersModule } from './modules/project-members/project-members.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ProjectMembersModule } from './modules/project-members/project-members.
     PrismaModule,
     TaskDependenciesModule,
     ProjectMembersModule,
+    CommentsModule,
   ],
 })
 export class AppModule {}
