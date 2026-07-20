@@ -24,7 +24,13 @@ export class ActivityService {
   async getAllActivities() {
     return this.prisma.activity.findMany({
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         project: true,
         task: true,
       },
@@ -40,7 +46,13 @@ export class ActivityService {
         projectId,
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         task: true,
       },
       orderBy: {
@@ -55,7 +67,13 @@ export class ActivityService {
         taskId,
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         project: true,
       },
       orderBy: {
