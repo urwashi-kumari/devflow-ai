@@ -35,13 +35,14 @@ model User {
   memberships   ProjectMember[]
   comments      Comment[]
   activities    Activity[]
+  assignedTasks Task[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Project {
-  id           String  @id @default(cuid())
+  id           String @id @default(cuid())
   name         String
   description  String?
   githubRepo   String?
@@ -50,16 +51,16 @@ model Project {
   ownerId String
   owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  tasks       Task[]
-  members     ProjectMember[]
-  activities  Activity[]
+  tasks      Task[]
+  members    ProjectMember[]
+  activities Activity[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Task {
-  id          String  @id @default(cuid())
+  id          String @id @default(cuid())
   title       String
   description String?
 
@@ -74,9 +75,12 @@ model Task {
   dependencies TaskDependency[] @relation("TaskDependencies")
   dependents   TaskDependency[] @relation("TaskDependents")
 
-  comments     Comment[]
-  attachments  Attachment[]
-  activities   Activity[]
+  comments    Comment[]
+  attachments Attachment[]
+  activities  Activity[]
+
+  assigneeId String?
+  assignee   User? @relation(fields: [assigneeId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

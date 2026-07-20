@@ -44,4 +44,17 @@ export class TasksController {
   deleteTask(@Param() params: TaskParamDto) {
     return this.tasksService.deleteTask(params.id);
   }
+
+  @Patch(':id/assign')
+  assignTask(
+    @Param() params: TaskParamDto,
+    @Body('userId') userId: string,
+  ) {
+    return this.tasksService.assignTask(params.id, userId);
+  }
+
+  @Patch(':id/unassign')
+  unassignTask(@Param() params: TaskParamDto) {
+    return this.tasksService.unassignTask(params.id);
+  }
 }
