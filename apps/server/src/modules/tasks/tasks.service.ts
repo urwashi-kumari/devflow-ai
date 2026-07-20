@@ -1,14 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ActivityService } from '../activity/activity.service';
 import { CreateTaskDto } from './dto/create-task.dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto/update-task.dto';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly activityService: ActivityService,
+  ) {}
 
   async createTask(dto: CreateTaskDto) {
-    return this.prisma.task.create({
+    const task = await this.prisma.task.create({
       data: {
         title: dto.title,
         description: dto.description,
@@ -18,6 +22,23 @@ export class TasksService {
         projectId: dto.projectId,
       },
     });
+
+    const project = await this.prisma.project.findUnique({
+      where: {
+        id: task.projectId,
+      },
+    });
+
+    if (project) {
+      await this.activityService.logActivity(
+        `Created task "${task.title}"`,
+        project.ownerId,
+        project.id,
+        task.id,
+      );
+    }
+
+    return task;
   }
 
   async getTasks(projectId: string) {
@@ -48,7 +69,7 @@ export class TasksService {
   async updateTask(taskId: string, dto: UpdateTaskDto) {
     await this.getTaskById(taskId);
 
-    return this.prisma.task.update({
+    const updatedTask = await this.prisma.task.update({
       where: {
         id: taskId,
       },
@@ -57,10 +78,42 @@ export class TasksService {
         dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
       },
     });
+
+    const project = await this.prisma.project.findUnique({
+      where: {
+        id: updatedTask.projectId,
+      },
+    });
+
+    if (project) {
+      await this.activityService.logActivity(
+        `Updated task "${updatedTask.title}"`,
+        project.ownerId,
+        project.id,
+        updatedTask.id,
+      );
+    }
+
+    return updatedTask;
   }
 
   async deleteTask(taskId: string) {
-    await this.getTaskById(taskId);
+    const task = await this.getTaskById(taskId);
+
+    const project = await this.prisma.project.findUnique({
+      where: {
+        id: task.projectId,
+      },
+    });
+
+    if (project) {
+      await this.activityService.logActivity(
+        `Deleted task "${task.title}"`,
+        project.ownerId,
+        project.id,
+        task.id,
+      );
+    }
 
     await this.prisma.task.delete({
       where: {
