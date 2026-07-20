@@ -1,14 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ActivityService } from '../activity/activity.service';
 import { CreateProjectDto } from './dto/create-project.dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto/update-project.dto';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly activityService: ActivityService,
+  ) {}
 
   async createProject(userId: string, dto: CreateProjectDto) {
-    return this.prisma.project.create({
+    const project = await this.prisma.project.create({
       data: {
         name: dto.name,
         description: dto.description,
@@ -17,6 +21,14 @@ export class ProjectsService {
         ownerId: userId,
       },
     });
+
+    await this.activityService.logActivity(
+      `Created project "${project.name}"`,
+      userId,
+      project.id,
+    );
+
+    return project;
   }
 
   async getMyProjects(userId: string) {
@@ -61,7 +73,7 @@ export class ProjectsService {
       throw new NotFoundException('Project not found');
     }
 
-    return this.prisma.project.update({
+    const updatedProject = await this.prisma.project.update({
       where: {
         id: projectId,
       },
@@ -69,6 +81,14 @@ export class ProjectsService {
         ...dto,
       },
     });
+
+    await this.activityService.logActivity(
+      `Updated project "${updatedProject.name}"`,
+      userId,
+      updatedProject.id,
+    );
+
+    return updatedProject;
   }
 
   async deleteProject(userId: string, projectId: string) {
@@ -82,6 +102,12 @@ export class ProjectsService {
     if (!project) {
       throw new NotFoundException('Project not found');
     }
+
+    await this.activityService.logActivity(
+      `Deleted project "${project.name}"`,
+      userId,
+      project.id,
+    );
 
     await this.prisma.project.delete({
       where: {

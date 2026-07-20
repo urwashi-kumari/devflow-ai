@@ -15,6 +15,7 @@ import { TaskDependenciesModule } from './modules/task-dependencies/task-depende
 import { ProjectMembersModule } from './modules/project-members/project-members.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { AttachmentsModule } from './modules/attachments/attachments.module';
+import { ActivityModule } from './modules/activity/activity.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AttachmentsModule } from './modules/attachments/attachments.module';
     ProjectMembersModule,
     CommentsModule,
     AttachmentsModule,
+    ActivityModule,
   ],
 })
 export class AppModule {}
