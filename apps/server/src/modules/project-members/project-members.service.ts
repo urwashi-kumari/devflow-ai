@@ -5,11 +5,15 @@ import {
 } from '@nestjs/common';
 import { ProjectRole } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ActivityService } from '../activity/activity.service';
 import { CreateProjectMemberDto } from './dto/create-project-member.dto';
 
 @Injectable()
 export class ProjectMembersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private activityService: ActivityService,
+  ) {}
 
   async addMember(
     projectId: string,
@@ -47,13 +51,21 @@ export class ProjectMembersService {
       );
     }
 
-    return this.prisma.projectMember.create({
+    const member = await this.prisma.projectMember.create({
       data: {
         userId: dto.userId,
         projectId,
         role: dto.role,
       },
     });
+
+    await this.activityService.logActivity(
+      `Added member "${user.name}" to project "${project.name}"`,
+      project.ownerId,
+      project.id,
+    );
+
+    return member;
   }
 
   async getMembers(projectId: string) {
@@ -78,27 +90,50 @@ export class ProjectMembersService {
     const member =
       await this.prisma.projectMember.findUnique({
         where: { id: memberId },
+        include: {
+          user: true,
+          project: true,
+        },
       });
 
     if (!member) {
       throw new NotFoundException('Member not found.');
     }
 
-    return this.prisma.projectMember.update({
-      where: { id: memberId },
-      data: { role },
-    });
+    const updatedMember =
+      await this.prisma.projectMember.update({
+        where: { id: memberId },
+        data: { role },
+      });
+
+    await this.activityService.logActivity(
+      `Updated ${member.user.name}'s role to ${role} in project "${member.project.name}"`,
+      member.project.ownerId,
+      member.project.id,
+    );
+
+    return updatedMember;
   }
 
   async removeMember(memberId: string) {
     const member =
       await this.prisma.projectMember.findUnique({
         where: { id: memberId },
+        include: {
+          user: true,
+          project: true,
+        },
       });
 
     if (!member) {
       throw new NotFoundException('Member not found.');
     }
+
+    await this.activityService.logActivity(
+      `Removed member "${member.user.name}" from project "${member.project.name}"`,
+      member.project.ownerId,
+      member.project.id,
+    );
 
     await this.prisma.projectMember.delete({
       where: { id: memberId },
