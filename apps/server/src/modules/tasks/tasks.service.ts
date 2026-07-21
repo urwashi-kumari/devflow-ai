@@ -5,12 +5,14 @@ import { CreateTaskDto } from './dto/create-task.dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto/update-task.dto';
 import { TaskFilterDto } from './dto/task-filter.dto';
 import { Prisma } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class TasksService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly activityService: ActivityService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async createTask(dto: CreateTaskDto) {
@@ -145,50 +147,56 @@ export class TasksService {
       message: 'Task deleted successfully',
     };
   }
-
   async assignTask(taskId: string, userId: string) {
-    const task = await this.prisma.task.findUnique({
-      where: {
-        id: taskId,
-      },
-      include: {
-        project: true,
-      },
-    });
+  const task = await this.prisma.task.findUnique({
+    where: {
+      id: taskId,
+    },
+    include: {
+      project: true,
+    },
+  });
 
-    if (!task) {
-      throw new NotFoundException('Task not found');
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const updatedTask = await this.prisma.task.update({
-      where: {
-        id: taskId,
-      },
-      data: {
-        assigneeId: userId,
-      },
-    });
-
-    await this.activityService.logActivity(
-      `Assigned ${user.name} to task "${task.title}"`,
-      task.project.ownerId,
-      task.project.id,
-      task.id,
-    );
-
-    return updatedTask;
+  if (!task) {
+    throw new NotFoundException('Task not found');
   }
 
+  const user = await this.prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw new NotFoundException('User not found');
+  }
+
+  const updatedTask = await this.prisma.task.update({
+    where: {
+      id: taskId,
+    },
+    data: {
+      assigneeId: userId,
+    },
+  });
+
+  await this.activityService.logActivity(
+    `Assigned ${user.name} to task "${task.title}"`,
+    task.project.ownerId,
+    task.project.id,
+    task.id,
+  );
+
+  await this.notificationsService.createNotification({
+    title: 'Task Assigned',
+    message: `You have been assigned to "${task.title}"`,
+    userId: user.id,
+  });
+
+  return updatedTask;
+}
+
+  
   async unassignTask(taskId: string) {
     const task = await this.prisma.task.findUnique({
       where: {
