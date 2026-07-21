@@ -12,6 +12,7 @@ import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto/update-task.dto';
 import { TaskParamDto } from './dto/task-param.dto/task-param.dto';
+import { TaskFilterDto } from './dto/task-filter.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -20,6 +21,11 @@ export class TasksController {
   @Post()
   createTask(@Body() dto: CreateTaskDto) {
     return this.tasksService.createTask(dto);
+  }
+
+  @Get('filter')
+  getFilteredTasks(@Query() filter: TaskFilterDto) {
+    return this.tasksService.getFilteredTasks(filter);
   }
 
   @Get()

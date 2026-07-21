@@ -3,6 +3,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityService } from '../activity/activity.service';
 import { CreateTaskDto } from './dto/create-task.dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto/update-task.dto';
+import { TaskFilterDto } from './dto/task-filter.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
@@ -187,48 +189,116 @@ export class TasksService {
     return updatedTask;
   }
 
- async unassignTask(taskId: string) {
-  const task = await this.prisma.task.findUnique({
-    where: {
-      id: taskId,
-    },
-    include: {
-      project: true,
-    },
-  });
+  async unassignTask(taskId: string) {
+    const task = await this.prisma.task.findUnique({
+      where: {
+        id: taskId,
+      },
+      include: {
+        project: true,
+      },
+    });
 
-  if (!task) {
-    throw new NotFoundException('Task not found');
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+
+    if (!task.assigneeId) {
+      throw new NotFoundException('Task is not assigned');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: task.assigneeId,
+      },
+    });
+
+    const assigneeName = user?.name ?? 'Unknown User';
+
+    const updatedTask = await this.prisma.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        assigneeId: null,
+      },
+    });
+
+    await this.activityService.logActivity(
+      `Unassigned ${assigneeName} from task "${task.title}"`,
+      task.project.ownerId,
+      task.project.id,
+      task.id,
+    );
+
+    return updatedTask;
   }
 
-  if (!task.assigneeId) {
-    throw new NotFoundException('Task is not assigned');
+  async getFilteredTasks(filter: TaskFilterDto) {
+    const {
+      projectId,
+      search,
+      status,
+      priority,
+      assigneeId,
+      page = 1,
+      limit = 10,
+    } = filter;
+
+    const where: Prisma.TaskWhereInput = {};
+
+    if (projectId) {
+      where.projectId = projectId;
+    }
+
+    if (search) {
+      where.title = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (priority) {
+      where.priority = priority;
+    }
+
+    if (assigneeId) {
+      where.assigneeId = assigneeId;
+    }
+
+    const [tasks, total] = await this.prisma.$transaction([
+      this.prisma.task.findMany({
+        where,
+        include: {
+          assignee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.task.count({
+        where,
+      }),
+    ]);
+
+    return {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      tasks,
+    };
   }
-
-  const user = await this.prisma.user.findUnique({
-    where: {
-      id: task.assigneeId,
-    },
-  });
-
-  const assigneeName = user?.name ?? 'Unknown User';
-
-  const updatedTask = await this.prisma.task.update({
-    where: {
-      id: taskId,
-    },
-    data: {
-      assigneeId: null,
-    },
-  });
-
-  await this.activityService.logActivity(
-    `Unassigned ${assigneeName} from task "${task.title}"`,
-    task.project.ownerId,
-    task.project.id,
-    task.id,
-  );
-
-  return updatedTask;
-}
 }
