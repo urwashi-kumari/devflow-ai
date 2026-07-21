@@ -15,6 +15,7 @@ import { ProjectMembersModule } from './modules/project-members/project-members.
 import { CommentsModule } from './modules/comments/comments.module';
 import { AttachmentsModule } from './modules/attachments/attachments.module';
 import { ActivityModule } from './modules/activity/activity.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ActivityModule } from './modules/activity/activity.module';
     NotificationsModule,
     HealthModule,
     UsersModule,
+    MailModule,
   ],
 })
 export class AppModule {}

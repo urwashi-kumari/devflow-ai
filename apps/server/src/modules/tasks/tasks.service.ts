@@ -6,6 +6,7 @@ import { UpdateTaskDto } from './dto/update-task.dto/update-task.dto';
 import { TaskFilterDto } from './dto/task-filter.dto';
 import { Prisma } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class TasksService {
@@ -13,6 +14,7 @@ export class TasksService {
     private readonly prisma: PrismaService,
     private readonly activityService: ActivityService,
     private readonly notificationsService: NotificationsService,
+    private readonly mailService: MailService,
   ) {}
 
   async createTask(dto: CreateTaskDto) {
@@ -192,6 +194,12 @@ export class TasksService {
     message: `You have been assigned to "${task.title}"`,
     userId: user.id,
   });
+
+  await this.mailService.sendTaskAssignedEmail(
+    user.email,
+    user.name,
+    task.title,
+  );
 
   return updatedTask;
 }
