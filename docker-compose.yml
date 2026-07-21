@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: devflow-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: DevFlow@12345
+      POSTGRES_DB: devflow_ai
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: devflow-backend
+    restart: unless-stopped
+
+    depends_on:
+      - postgres
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+
+      DATABASE_URL: postgresql://postgres:DevFlow%4012345@postgres:5432/devflow_ai?schema=public
+
+      JWT_SECRET: devflow-ai-super-secret-jwt-key-2026
+
+      GEMINI_API_KEY: your-gemini-api-key
+
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USER: urwashiii04@gmail.com
+      MAIL_PASS: mhkb ovdp tygx fpgf
+      MAIL_FROM: urwashiii04@gmail.com
+
+volumes:
+  postgres_data:
