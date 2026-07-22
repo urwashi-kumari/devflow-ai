@@ -55,7 +55,13 @@ export class AuthService {
 
     const user = await this.usersService.findByEmail(email);
 
+    console.log('================ LOGIN DEBUG ================');
+    console.log('Entered Email:', email);
+    console.log('Entered Password:', password);
+    console.log('User Found:', user);
+
     if (!user) {
+      console.log('❌ User not found');
       throw new UnauthorizedException('Invalid email or password');
     }
 
@@ -63,6 +69,10 @@ export class AuthService {
       password,
       user.password,
     );
+
+    console.log('Stored Hash:', user.password);
+    console.log('Password Match:', isPasswordValid);
+    console.log('=============================================');
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
@@ -82,5 +92,15 @@ export class AuthService {
         email: user.email,
       },
     };
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return user;
   }
 }

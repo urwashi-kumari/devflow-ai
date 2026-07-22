@@ -51,18 +51,18 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current logged-in user profile' })
-  @ApiResponse({
-    status: 200,
-    description: 'User profile returned successfully.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized.',
-  })
-  getProfile(@Req() req: any) {
-    return req.user;
-  }
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+@ApiOperation({ summary: 'Get current logged-in user profile' })
+@ApiResponse({
+  status: 200,
+  description: 'User profile returned successfully.',
+})
+@ApiResponse({
+  status: 401,
+  description: 'Unauthorized.',
+})
+getProfile(@Req() req: any) {
+  return this.authService.getProfile(req.user.userId);
+}
 }
