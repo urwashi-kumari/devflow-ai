@@ -1,5 +1,9 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+
+import { loginSchema, type LoginFormData } from "../schemas/auth";
 import { login as loginApi } from "../services/auth";
 import { useAuthContext } from "../context/AuthContext";
 
@@ -7,35 +11,29 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuthContext();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const mutation = useMutation({
+    mutationFn: loginApi,
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setError("");
-    setLoading(true);
-
-    try {
-      const response = await loginApi({
-        email,
-        password,
-      });
-
-      // Adjust this if your backend returns a different field name
-      const token = response.accessToken;
-
-      await login(token);
-
+    onSuccess: async (data) => {
+      await login(data.accessToken);
       navigate("/dashboard");
-    } catch (err) {
-      setError("Invalid email or password");
-    } finally {
-      setLoading(false);
-    }
+    },
+
+    onError: () => {
+      alert("Invalid email or password");
+    },
+  });
+
+  const onSubmit = (data: LoginFormData) => {
+    mutation.mutate(data);
   };
 
   return (
@@ -48,46 +46,50 @@ export default function LoginPage() {
     >
       <h1>Login</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <input
           type="email"
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          {...register("email")}
           style={{
             width: "100%",
             padding: "12px",
-            marginBottom: "15px",
+            marginBottom: "8px",
           }}
         />
+
+        {errors.email && (
+          <p style={{ color: "red", marginBottom: "12px" }}>
+            {errors.email.message}
+          </p>
+        )}
 
         <input
           type="password"
           placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          {...register("password")}
           style={{
             width: "100%",
             padding: "12px",
-            marginBottom: "15px",
+            marginBottom: "8px",
           }}
         />
 
-        {error && (
-          <p style={{ color: "red" }}>
-            {error}
+        {errors.password && (
+          <p style={{ color: "red", marginBottom: "12px" }}>
+            {errors.password.message}
           </p>
         )}
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={mutation.isPending}
           style={{
             width: "100%",
             padding: "12px",
           }}
         >
-          {loading ? "Logging in..." : "Login"}
+          {mutation.isPending ? "Logging in..." : "Login"}
         </button>
       </form>
 

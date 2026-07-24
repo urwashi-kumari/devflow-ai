@@ -3,11 +3,19 @@ import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
+
 import DashboardPage from "../pages/DashboardPage";
+import ProjectsPage from "../pages/ProjectsPage";
+import TasksPage from "../pages/TasksPage";
+import NotificationsPage from "../pages/NotificationsPage";
+import SettingsPage from "../pages/SettingsPage";
+
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import NotFoundPage from "../pages/NotFoundPage";
+
 import ProtectedRoute from "../components/ProtectedRoute";
+import PublicRoute from "../components/PublicRoute";
 
 export const router = createBrowserRouter([
   {
@@ -19,11 +27,19 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/login",
-        element: <LoginPage />,
+        element: (
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        ),
       },
       {
         path: "/register",
-        element: <RegisterPage />,
+        element: (
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        ),
       },
     ],
   },
@@ -37,6 +53,22 @@ export const router = createBrowserRouter([
       {
         path: "/dashboard",
         element: <DashboardPage />,
+      },
+      {
+        path: "/projects",
+        element: <ProjectsPage />,
+      },
+      {
+        path: "/tasks",
+        element: <TasksPage />,
+      },
+      {
+        path: "/notifications",
+        element: <NotificationsPage />,
+      },
+      {
+        path: "/settings",
+        element: <SettingsPage />,
       },
     ],
   },
