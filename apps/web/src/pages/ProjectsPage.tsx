@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import useProjects from "../hooks/useProjects";
 import CreateProjectForm from "../components/CreateProjectForm";
 import EditProjectForm from "../components/EditProjectForm";
@@ -11,6 +13,8 @@ export default function ProjectsPage() {
     error,
     fetchProjects,
   } = useProjects();
+
+  const navigate = useNavigate();
 
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
@@ -33,14 +37,12 @@ export default function ProjectsPage() {
 
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">
-          Projects
-        </h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Projects</h1>
 
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition"
+          className="rounded-lg bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700"
         >
           {showForm ? "Close" : "+ New Project"}
         </button>
@@ -66,38 +68,34 @@ export default function ProjectsPage() {
         />
       )}
 
-      {loading && (
-        <p>Loading projects...</p>
-      )}
+      {loading && <p>Loading projects...</p>}
 
-      {error && (
-        <p className="text-red-500">{error}</p>
-      )}
+      {error && <p className="text-red-500">{error}</p>}
 
       {!loading && !error && projects.length === 0 && (
-        <div className="text-center py-20 border rounded-xl bg-white shadow">
+        <div className="rounded-xl border bg-white py-20 text-center shadow">
           <h2 className="text-xl font-semibold">
             No Projects Yet
           </h2>
 
-          <p className="text-gray-500 mt-2">
+          <p className="mt-2 text-gray-500">
             Click "New Project" to create your first project.
           </p>
         </div>
       )}
 
       {!loading && !error && projects.length > 0 && (
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {projects.map((project: any) => (
             <div
               key={project.id || project._id}
-              className="bg-white rounded-xl shadow-md border p-5 hover:shadow-xl transition"
+              className="rounded-xl border bg-white p-5 shadow-md transition hover:shadow-xl"
             >
               <h2 className="text-xl font-bold">
                 {project.name}
               </h2>
 
-              <p className="mt-2 text-gray-600 min-h-15">
+              <p className="mt-2 min-h-15 text-gray-600">
                 {project.description || "No description"}
               </p>
 
@@ -105,10 +103,19 @@ export default function ProjectsPage() {
                 Branch: {project.githubBranch || "main"}
               </div>
 
-              <div className="mt-6 flex gap-3">
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button
+                  onClick={() =>
+                    navigate(`/projects/${project.id || project._id}`)
+                  }
+                  className="rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
+                >
+                  View Details
+                </button>
+
                 <button
                   onClick={() => setEditingProject(project)}
-                  className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"
+                  className="rounded-lg bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
                 >
                   Edit
                 </button>
@@ -117,7 +124,7 @@ export default function ProjectsPage() {
                   onClick={() =>
                     handleDelete(project.id || project._id)
                   }
-                  className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
+                  className="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
                 >
                   Delete
                 </button>
