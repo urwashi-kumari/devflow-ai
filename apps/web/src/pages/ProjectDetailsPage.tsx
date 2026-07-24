@@ -1,11 +1,36 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import useTasks from "../hooks/useTasks";
+import CreateTaskForm from "../components/CreateTaskForm";
+import EditTaskForm from "../components/EditTaskForm";
+import * as taskService from "../services/task";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { tasks, loading } = useTasks(id ?? "");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<any>(null);
+
+  const { tasks, loading, refreshTasks } = useTasks(id ?? "");
+
+  const handleDelete = async (taskId: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await taskService.deleteTask(taskId);
+      await refreshTasks();
+      alert("Task deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete task.");
+    }
+  };
 
   return (
     <div className="p-8">
@@ -26,10 +51,40 @@ export default function ProjectDetailsPage() {
           </p>
         </div>
 
-        <button className="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700">
+        <button
+          onClick={() => {
+            setEditingTask(null);
+            setShowCreateForm(true);
+          }}
+          className="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
+        >
           + New Task
         </button>
       </div>
+
+      {/* Create Task */}
+      {showCreateForm && (
+        <CreateTaskForm
+          projectId={id ?? ""}
+          onSuccess={() => {
+            setShowCreateForm(false);
+            refreshTasks();
+          }}
+          onCancel={() => setShowCreateForm(false)}
+        />
+      )}
+
+      {/* Edit Task */}
+      {editingTask && (
+        <EditTaskForm
+          task={editingTask}
+          onSuccess={() => {
+            setEditingTask(null);
+            refreshTasks();
+          }}
+          onCancel={() => setEditingTask(null)}
+        />
+      )}
 
       {/* Tasks */}
       <div className="rounded-xl border bg-white p-6 shadow-sm">
@@ -68,11 +123,20 @@ export default function ProjectDetailsPage() {
                   </span>
 
                   <div className="flex gap-3">
-                    <button className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                    <button
+                      onClick={() => {
+                        setShowCreateForm(false);
+                        setEditingTask(task);
+                      }}
+                      className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                    >
                       Edit
                     </button>
 
-                    <button className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600">
+                    <button
+                      onClick={() => handleDelete(task.id)}
+                      className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                    >
                       Delete
                     </button>
                   </div>
