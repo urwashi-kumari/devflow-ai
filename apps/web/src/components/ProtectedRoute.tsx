@@ -5,15 +5,15 @@ interface Props {
   children: React.ReactNode;
 }
 
-export default function PublicRoute({ children }: Props) {
+export default function ProtectedRoute({ children }: Props) {
   const { token, loading } = useAuthContext();
 
   if (loading) {
     return <p>Loading...</p>;
   }
 
-  if (token) {
-    return <Navigate to="/dashboard" replace />;
+  if (!token) {
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

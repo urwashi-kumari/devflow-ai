@@ -1,34 +1,7 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@import "tailwindcss";
 
 body {
+  margin: 0;
   font-family: Inter, Arial, sans-serif;
-  background-color: #f5f7fb;
-  color: #1f2937;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-main {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-}
-
-h1 {
-  font-size: 3rem;
-  font-weight: 700;
-}
-
-p {
-  font-size: 1.1rem;
-  color: #6b7280;
+  background: #f5f7fb;
 }
