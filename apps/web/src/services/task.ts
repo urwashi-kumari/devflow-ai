@@ -46,3 +46,8 @@ export const unassignTask = async (taskId: string) => {
 
   return response.data;
 };
+
+export const filterTasks = async (filters: Record<string, string | number>) => {
+  const response = await api.get("/tasks/filter", { params: filters });
+  return response.data;
+};
