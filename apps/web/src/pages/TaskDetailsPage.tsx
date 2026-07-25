@@ -9,8 +9,10 @@ import useAttachments from "../hooks/useAttachments";
 import * as attachmentService from "../services/attachment";
 import * as commentService from "../services/comment";
 import * as taskService from "../services/task";
+import * as dependencyService from "../services/taskDependency";
 import { getMembers } from "../services/projectMember";
 import type { ProjectMember } from "../services/projectMember";
+import type { TaskDependency } from "../services/taskDependency";
 
 export default function TaskDetailsPage() {
   const { id } = useParams();
@@ -25,6 +27,10 @@ export default function TaskDetailsPage() {
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [selectedAssigneeId, setSelectedAssigneeId] = useState("");
   const [assigning, setAssigning] = useState(false);
+  const [projectTasks, setProjectTasks] = useState<any[]>([]);
+  const [dependencies, setDependencies] = useState<TaskDependency[]>([]);
+  const [selectedDependencyId, setSelectedDependencyId] = useState("");
+  const [dependencySaving, setDependencySaving] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { comments, loading: commentsLoading, refreshComments } = useComments(id ?? "");
@@ -50,6 +56,22 @@ export default function TaskDetailsPage() {
     };
     loadMembers();
   }, [task?.projectId, task?.assigneeId]);
+
+  const loadDependencies = async () => {
+    if (!id || !task?.projectId) return;
+    try {
+      const [tasks, allDependencies] = await Promise.all([
+        taskService.getTasks(task.projectId),
+        dependencyService.getDependencies(),
+      ]);
+      setProjectTasks(tasks);
+      setDependencies(allDependencies.filter((dependency) => dependency.taskId === id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => { loadDependencies(); }, [id, task?.projectId]);
 
   const addComment = async () => {
     if (!id || !user || !newComment.trim()) return;
@@ -87,6 +109,30 @@ export default function TaskDetailsPage() {
       alert(error.response?.data?.message || "Failed to update assignee.");
     } finally {
       setAssigning(false);
+    }
+  };
+  const addDependency = async () => {
+    if (!id || !selectedDependencyId) return;
+    try {
+      setDependencySaving(true);
+      await dependencyService.addDependency(id, selectedDependencyId);
+      setSelectedDependencyId("");
+      await loadDependencies();
+    } catch (error: any) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to add dependency.");
+    } finally {
+      setDependencySaving(false);
+    }
+  };
+  const removeDependency = async (dependencyId: string) => {
+    if (!window.confirm("Remove this dependency?")) return;
+    try {
+      await dependencyService.removeDependency(dependencyId);
+      await loadDependencies();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to remove dependency.");
     }
   };
   const uploadAttachment = async () => {
@@ -144,6 +190,31 @@ export default function TaskDetailsPage() {
               </button>
             </div>
             {members.length === 0 && <p className="mt-2 text-sm text-gray-500">Add project members before assigning this task.</p>}
+          </div>
+          <div className="mt-6 border-t pt-5">
+            <label className="block text-sm font-medium text-gray-700">Task dependencies</label>
+            <p className="mt-1 text-sm text-gray-500">Select a task that must be completed before this one.</p>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <select value={selectedDependencyId} onChange={(event) => setSelectedDependencyId(event.target.value)} className="min-w-56 rounded border p-2">
+                <option value="">Select a task</option>
+                {projectTasks.filter((projectTask) => projectTask.id !== id && !dependencies.some((dependency) => dependency.dependsOnTaskId === projectTask.id)).map((projectTask) => (
+                  <option key={projectTask.id} value={projectTask.id}>{projectTask.title}</option>
+                ))}
+              </select>
+              <button onClick={addDependency} disabled={!selectedDependencyId || dependencySaving} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50">
+                {dependencySaving ? "Adding..." : "Add dependency"}
+              </button>
+            </div>
+            {dependencies.length === 0 ? <p className="mt-3 text-sm text-gray-500">This task has no dependencies.</p> : (
+              <ul className="mt-3 divide-y rounded border">
+                {dependencies.map((dependency) => (
+                  <li key={dependency.id} className="flex items-center justify-between gap-3 p-3">
+                    <span>{dependency.dependsOn.title}</span>
+                    <button onClick={() => removeDependency(dependency.id)} className="text-sm text-red-600 hover:underline">Remove</button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </section>
       )}
