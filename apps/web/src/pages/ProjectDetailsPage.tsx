@@ -5,6 +5,7 @@ import useTasks from "../hooks/useTasks";
 import CreateTaskForm from "../components/CreateTaskForm";
 import EditTaskForm from "../components/EditTaskForm";
 import TaskCard from "../components/TaskCard";
+import ProjectMembers from "../components/ProjectMembers";
 import * as taskService from "../services/task";
 
 export default function ProjectDetailsPage() {
@@ -86,6 +87,8 @@ export default function ProjectDetailsPage() {
           onCancel={() => setEditingTask(null)}
         />
       )}
+
+      <ProjectMembers projectId={id ?? ""} />
 
       {/* Tasks */}
       <div className="rounded-xl border bg-white p-6 shadow-sm">
