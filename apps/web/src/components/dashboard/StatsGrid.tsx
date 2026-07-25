@@ -1,3 +1,4 @@
+import { CheckCircle2, CircleDot, Clock3, Flame, ListTodo, OctagonAlert, Users } from "lucide-react";
 import StatCard from "./StatCard";
 
 interface StatsGridProps {
@@ -12,24 +13,20 @@ interface StatsGridProps {
   };
 }
 
-export default function StatsGrid({
-  stats,
-}: StatsGridProps) {
+export default function StatsGrid({ stats }: StatsGridProps) {
+  const cards = [
+    ["Total tasks", stats.totalTasks, ListTodo, "violet"],
+    ["To do", stats.todo, CircleDot, "sky"],
+    ["In progress", stats.inProgress, Clock3, "amber"],
+    ["Completed", stats.done, CheckCircle2, "emerald"],
+    ["High priority", stats.highPriority, Flame, "rose"],
+    ["Overdue", stats.overdue, OctagonAlert, "orange"],
+    ["Members", stats.members, Users, "indigo"],
+  ] as const;
+
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))",
-        gap: "16px",
-      }}
-    >
-      <StatCard title="Total Tasks" value={stats.totalTasks} />
-      <StatCard title="Todo" value={stats.todo} />
-      <StatCard title="In Progress" value={stats.inProgress} />
-      <StatCard title="Done" value={stats.done} />
-      <StatCard title="High Priority" value={stats.highPriority} />
-      <StatCard title="Overdue" value={stats.overdue} />
-      <StatCard title="Members" value={stats.members} />
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {cards.map(([title, value, icon, tone]) => <StatCard key={title} title={title} value={value} icon={icon} tone={tone} />)}
     </div>
   );
 }
