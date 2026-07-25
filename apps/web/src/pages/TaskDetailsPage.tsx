@@ -9,6 +9,8 @@ import useAttachments from "../hooks/useAttachments";
 import * as attachmentService from "../services/attachment";
 import * as commentService from "../services/comment";
 import * as taskService from "../services/task";
+import { getMembers } from "../services/projectMember";
+import type { ProjectMember } from "../services/projectMember";
 
 export default function TaskDetailsPage() {
   const { id } = useParams();
@@ -20,6 +22,9 @@ export default function TaskDetailsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [posting, setPosting] = useState(false);
+  const [members, setMembers] = useState<ProjectMember[]>([]);
+  const [selectedAssigneeId, setSelectedAssigneeId] = useState("");
+  const [assigning, setAssigning] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { comments, loading: commentsLoading, refreshComments } = useComments(id ?? "");
@@ -32,6 +37,19 @@ export default function TaskDetailsPage() {
     finally { setLoading(false); }
   };
   useEffect(() => { loadTask(); }, [id]);
+
+  useEffect(() => {
+    if (!task?.projectId) return;
+    const loadMembers = async () => {
+      try {
+        setMembers(await getMembers(task.projectId));
+        setSelectedAssigneeId(task.assigneeId ?? "");
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    loadMembers();
+  }, [task?.projectId, task?.assigneeId]);
 
   const addComment = async () => {
     if (!id || !user || !newComment.trim()) return;
@@ -53,6 +71,23 @@ export default function TaskDetailsPage() {
     if (!id || !window.confirm("Delete this task?")) return;
     try { await taskService.deleteTask(id); navigate(`/projects/${task.projectId}`); }
     catch (err) { console.error(err); alert("Failed to delete task."); }
+  };
+  const updateAssignee = async () => {
+    if (!id) return;
+    try {
+      setAssigning(true);
+      if (selectedAssigneeId) {
+        await taskService.assignTask(id, selectedAssigneeId);
+      } else {
+        await taskService.unassignTask(id);
+      }
+      await loadTask();
+    } catch (error: any) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to update assignee.");
+    } finally {
+      setAssigning(false);
+    }
   };
   const uploadAttachment = async () => {
     if (!id || !user || !selectedFile) return;
@@ -97,6 +132,19 @@ export default function TaskDetailsPage() {
             <div><dt className="text-sm text-gray-500">Due date</dt><dd className="font-medium">{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "Not set"}</dd></div>
             <div><dt className="text-sm text-gray-500">Assignee</dt><dd className="font-medium">{task.assignee?.name || "Unassigned"}</dd></div>
           </dl>
+          <div className="mt-6 border-t pt-5">
+            <label className="block text-sm font-medium text-gray-700">Assign task</label>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <select value={selectedAssigneeId} onChange={(event) => setSelectedAssigneeId(event.target.value)} className="min-w-56 rounded border p-2">
+                <option value="">Unassigned</option>
+                {members.map((member) => <option key={member.id} value={member.userId}>{member.user.name} ({member.user.email})</option>)}
+              </select>
+              <button onClick={updateAssignee} disabled={assigning || (selectedAssigneeId === (task.assigneeId ?? ""))} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50">
+                {assigning ? "Saving..." : "Save assignee"}
+              </button>
+            </div>
+            {members.length === 0 && <p className="mt-2 text-sm text-gray-500">Add project members before assigning this task.</p>}
+          </div>
         </section>
       )}
       <section className="mt-6 rounded-xl border bg-white p-6 shadow-sm">

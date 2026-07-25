@@ -72,6 +72,10 @@ export default function TaskCard({
         {task.description || "No description"}
       </p>
 
+      <p className="mt-3 text-sm text-gray-500">
+        Assignee: {task.assignee?.name || "Unassigned"}
+      </p>
+
       <div className="mt-4 flex items-center justify-between">
         <span className="rounded bg-blue-100 px-3 py-1 text-sm text-blue-700">
           {task.status}
