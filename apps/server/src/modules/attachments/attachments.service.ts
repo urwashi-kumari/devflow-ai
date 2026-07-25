@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { unlink } from 'fs/promises';
+import { basename, join } from 'path';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityService } from '../activity/activity.service';
 import { CreateAttachmentDto } from './dto/create-attachment.dto';
@@ -10,7 +15,11 @@ export class AttachmentsService {
     private readonly activityService: ActivityService,
   ) {}
 
-  async create(taskId: string, dto: CreateAttachmentDto) {
+  async create(
+    taskId: string,
+    file: Express.Multer.File,
+    dto: CreateAttachmentDto,
+  ) {
     const task = await this.prisma.task.findUnique({
       where: { id: taskId },
     });
@@ -22,24 +31,20 @@ export class AttachmentsService {
     const attachment = await this.prisma.attachment.create({
       data: {
         taskId,
-        fileName: dto.fileName,
-        fileUrl: dto.fileUrl,
-        fileSize: dto.fileSize,
+        uploaderId: dto.uploaderId,
+        fileName: file.originalname,
+        fileUrl: `/uploads/${file.filename}`,
+        mimeType: file.mimetype,
+        fileSize: file.size,
       },
     });
 
-    const project = await this.prisma.project.findUnique({
-      where: { id: task.projectId },
-    });
-
-    if (project) {
-      await this.activityService.logActivity(
-        `Uploaded attachment "${attachment.fileName}" to task "${task.title}"`,
-        project.ownerId,
-        project.id,
-        task.id,
-      );
-    }
+    await this.activityService.logActivity(
+      `Uploaded attachment "${attachment.fileName}" to task "${task.title}"`,
+      dto.uploaderId,
+      task.projectId,
+      task.id,
+    );
 
     return attachment;
   }
@@ -47,6 +52,15 @@ export class AttachmentsService {
   async findAll(taskId: string) {
     return this.prisma.attachment.findMany({
       where: { taskId },
+      include: {
+        uploader: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
       orderBy: {
         uploadedAt: 'desc',
       },
@@ -65,22 +79,26 @@ export class AttachmentsService {
       throw new NotFoundException('Attachment not found');
     }
 
-    const project = await this.prisma.project.findUnique({
-      where: { id: attachment.task.projectId },
-    });
-
-    if (project) {
-      await this.activityService.logActivity(
-        `Deleted attachment "${attachment.fileName}" from task "${attachment.task.title}"`,
-        project.ownerId,
-        project.id,
-        attachment.task.id,
-      );
-    }
+    await this.activityService.logActivity(
+      `Deleted attachment "${attachment.fileName}" from task "${attachment.task.title}"`,
+      attachment.uploaderId,
+      attachment.task.projectId,
+      attachment.task.id,
+    );
 
     await this.prisma.attachment.delete({
       where: { id: attachmentId },
     });
+
+    try {
+      await unlink(
+        join(process.cwd(), 'uploads', basename(attachment.fileUrl)),
+      );
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw error;
+      }
+    }
 
     return {
       message: 'Attachment deleted successfully',

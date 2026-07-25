@@ -37,6 +37,7 @@ model User {
   activities    Activity[]
   assignedTasks Task[]
   notifications Notification[]
+  attachments   Attachment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -133,14 +134,18 @@ model Comment {
 }
 
 model Attachment {
-  id String @id @default(cuid())
+  id         String   @id @default(cuid())
 
-  fileName String
-  fileUrl  String
-  fileSize Int?
+  fileName   String
+  fileUrl    String
+  mimeType   String
+  fileSize   Int
 
-  taskId String
-  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId      String
+  task        Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  uploaderId  String
+  uploader    User @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
 
   uploadedAt DateTime @default(now())
 }

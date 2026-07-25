@@ -5,6 +5,8 @@ import CommentList from "../components/comments/CommentList";
 import EditTaskForm from "../components/EditTaskForm";
 import { useAuthContext } from "../context/AuthContext";
 import useComments from "../hooks/useComments";
+import useAttachments from "../hooks/useAttachments";
+import * as attachmentService from "../services/attachment";
 import * as commentService from "../services/comment";
 import * as taskService from "../services/task";
 
@@ -18,7 +20,10 @@ export default function TaskDetailsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [posting, setPosting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const { comments, loading: commentsLoading, refreshComments } = useComments(id ?? "");
+  const { attachments, loading: attachmentsLoading, refreshAttachments } = useAttachments(id ?? "");
 
   const loadTask = async () => {
     if (!id) return;
@@ -49,6 +54,27 @@ export default function TaskDetailsPage() {
     try { await taskService.deleteTask(id); navigate(`/projects/${task.projectId}`); }
     catch (err) { console.error(err); alert("Failed to delete task."); }
   };
+  const uploadAttachment = async () => {
+    if (!id || !user || !selectedFile) return;
+    try {
+      setUploading(true);
+      await attachmentService.uploadAttachment(id, selectedFile, user.id);
+      setSelectedFile(null);
+      await refreshAttachments();
+    } catch (err: any) {
+      console.error(err);
+      const message = err.response?.data?.message;
+      alert(Array.isArray(message) ? message.join(", ") : message || "Failed to upload attachment.");
+    }
+    finally { setUploading(false); }
+  };
+  const removeAttachment = async (attachmentId: string) => {
+    if (!window.confirm("Delete this attachment?")) return;
+    try { await attachmentService.deleteAttachment(attachmentId); await refreshAttachments(); }
+    catch (err) { console.error(err); alert("Failed to delete attachment."); }
+  };
+  const attachmentUrl = (fileUrl: string) => `${import.meta.env.VITE_API_URL ?? "http://localhost:3000"}${fileUrl}`;
+  const fileSize = (bytes: number) => bytes < 1024 * 1024 ? `${Math.ceil(bytes / 1024)} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
   if (loading) return <div className="p-8">Loading task...</div>;
   if (error || !task) return <div className="p-8 text-red-600">{error || "Task not found."}</div>;
@@ -77,6 +103,31 @@ export default function TaskDetailsPage() {
         <h2 className="text-2xl font-bold">Comments</h2>
         {commentsLoading ? <p className="mt-4">Loading comments...</p> : <CommentList comments={comments} currentUserId={user?.id} onUpdate={updateComment} onDelete={deleteComment} />}
         <div className={posting ? "pointer-events-none opacity-60" : ""}><CommentForm value={newComment} onChange={setNewComment} onSubmit={addComment} /></div>
+      </section>
+      <section className="mt-6 rounded-xl border bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-bold">Attachments</h2>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <input type="file" onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)} className="max-w-full" />
+          <button onClick={uploadAttachment} disabled={!selectedFile || uploading} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50">
+            {uploading ? "Uploading..." : "Upload file"}
+          </button>
+        </div>
+        <p className="mt-2 text-sm text-gray-500">Maximum file size: 10 MB.</p>
+        {attachmentsLoading ? <p className="mt-4">Loading attachments...</p> : attachments.length === 0 ? (
+          <p className="mt-4 text-gray-500">No attachments yet.</p>
+        ) : (
+          <ul className="mt-4 divide-y rounded border">
+            {attachments.map((attachment) => (
+              <li key={attachment.id} className="flex flex-wrap items-center justify-between gap-3 p-3">
+                <div>
+                  <a href={attachmentUrl(attachment.fileUrl)} target="_blank" rel="noreferrer" className="font-medium text-blue-600 hover:underline">{attachment.fileName}</a>
+                  <p className="text-sm text-gray-500">{fileSize(attachment.fileSize)} · uploaded by {attachment.uploader?.name || "Unknown user"}</p>
+                </div>
+                {attachment.uploaderId === user?.id && <button onClick={() => removeAttachment(attachment.id)} className="text-sm text-red-600 hover:underline">Delete</button>}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );
