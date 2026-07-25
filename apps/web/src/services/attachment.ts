@@ -19,11 +19,9 @@ export const getAttachments = async (taskId: string): Promise<Attachment[]> => {
 export const uploadAttachment = async (
   taskId: string,
   file: File,
-  uploaderId: string,
 ): Promise<Attachment> => {
   const data = new FormData();
   data.append("file", file);
-  data.append("uploaderId", uploaderId);
 
   const response = await api.post(`/tasks/${taskId}/attachments`, data, {
     headers: {

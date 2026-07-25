@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import CommentForm from "../components/comments/CommentForm";
 import CommentList from "../components/comments/CommentList";
 import EditTaskForm from "../components/EditTaskForm";
+import TaskAttachments from "../components/TaskAttachments";
 import { useAuthContext } from "../context/AuthContext";
 import useComments from "../hooks/useComments";
 import useAttachments from "../hooks/useAttachments";
@@ -135,24 +136,17 @@ export default function TaskDetailsPage() {
       alert("Failed to remove dependency.");
     }
   };
-  const uploadAttachment = async () => {
-    if (!id || !user || !selectedFile) return;
+  const uploadAttachment = async (file?: File) => {
+    if (!id || !file) return;
     try {
       setUploading(true);
-      await attachmentService.uploadAttachment(id, selectedFile, user.id);
-      setSelectedFile(null);
+      await attachmentService.uploadAttachment(id, file);
       await refreshAttachments();
-    } catch (err: any) {
-      console.error(err);
-      const message = err.response?.data?.message;
-      alert(Array.isArray(message) ? message.join(", ") : message || "Failed to upload attachment.");
-    }
-    finally { setUploading(false); }
+    } finally { setUploading(false); }
   };
   const removeAttachment = async (attachmentId: string) => {
-    if (!window.confirm("Delete this attachment?")) return;
-    try { await attachmentService.deleteAttachment(attachmentId); await refreshAttachments(); }
-    catch (err) { console.error(err); alert("Failed to delete attachment."); }
+    await attachmentService.deleteAttachment(attachmentId);
+    await refreshAttachments();
   };
   const attachmentUrl = (fileUrl: string) => `${import.meta.env.VITE_API_URL ?? "http://localhost:3000"}${fileUrl}`;
   const fileSize = (bytes: number) => bytes < 1024 * 1024 ? `${Math.ceil(bytes / 1024)} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -223,11 +217,13 @@ export default function TaskDetailsPage() {
         {commentsLoading ? <p className="mt-4">Loading comments...</p> : <CommentList comments={comments} currentUserId={user?.id} onUpdate={updateComment} onDelete={deleteComment} />}
         <div className={posting ? "pointer-events-none opacity-60" : ""}><CommentForm value={newComment} onChange={setNewComment} onSubmit={addComment} /></div>
       </section>
+      <TaskAttachments attachments={attachments} loading={attachmentsLoading} uploading={uploading} currentUserId={user?.id} onUpload={uploadAttachment} onDelete={removeAttachment} />
+      {false && (
       <section className="mt-6 rounded-xl border bg-white p-6 shadow-sm">
         <h2 className="text-2xl font-bold">Attachments</h2>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <input type="file" onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)} className="max-w-full" />
-          <button onClick={uploadAttachment} disabled={!selectedFile || uploading} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50">
+          <button onClick={() => uploadAttachment(selectedFile ?? undefined)} disabled={!selectedFile || uploading} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50">
             {uploading ? "Uploading..." : "Upload file"}
           </button>
         </div>
@@ -248,6 +244,7 @@ export default function TaskDetailsPage() {
           </ul>
         )}
       </section>
+      )}
     </div>
   );
 }
