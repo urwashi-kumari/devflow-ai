@@ -30,3 +30,16 @@ export const getProfile = async (token: string) => {
 
   return response.data;
 };
+
+export const updateProfile = async (data: { name: string; email: string }) => {
+  const response = await api.patch("/auth/me", data);
+  return response.data;
+};
+
+export const changePassword = async (data: {
+  currentPassword: string;
+  newPassword: string;
+}) => {
+  const response = await api.patch("/auth/me/password", data);
+  return response.data;
+};

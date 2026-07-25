@@ -103,4 +103,37 @@ export class AuthService {
 
     return user;
   }
+
+  async updateProfile(
+    userId: string,
+    profile: { name?: string; email?: string },
+  ) {
+    if (profile.email) {
+      const existingUser = await this.usersService.findByEmail(profile.email);
+      if (existingUser && existingUser.id !== userId) {
+        throw new BadRequestException('Email already exists');
+      }
+    }
+
+    return this.usersService.updateProfile(userId, profile);
+  }
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.usersService.findWithPasswordById(userId);
+
+    if (!user || !(await bcrypt.compare(currentPassword, user.password))) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    await this.usersService.updatePassword(
+      userId,
+      await bcrypt.hash(newPassword, 10),
+    );
+
+    return { message: 'Password updated successfully' };
+  }
 }
