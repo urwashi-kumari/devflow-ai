@@ -5,9 +5,10 @@ import {
   Get,
   Param,
   Post,
-  Body,
+  Req,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -22,9 +23,11 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 
 import { AttachmentsService } from './attachments.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Attachments')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller()
 export class AttachmentsController {
   constructor(
@@ -56,9 +59,6 @@ export class AttachmentsController {
     schema: {
       type: 'object',
       properties: {
-        uploaderId: {
-          type: 'string',
-        },
         file: {
           type: 'string',
           format: 'binary',
@@ -74,20 +74,16 @@ export class AttachmentsController {
   create(
     @Param('taskId') taskId: string,
     @UploadedFile() file: Express.Multer.File,
-    @Body('uploaderId') uploaderId: string,
+    @Req() req: any,
   ) {
     if (!file) {
       throw new BadRequestException('A file is required.');
     }
 
-    if (!uploaderId) {
-      throw new BadRequestException('Uploader ID is required.');
-    }
-
     return this.attachmentsService.create(
       taskId,
       file,
-      { uploaderId },
+      { uploaderId: req.user.userId },
     );
   }
 
@@ -99,9 +95,11 @@ export class AttachmentsController {
   @Delete('attachments/:attachmentId')
   remove(
     @Param('attachmentId') attachmentId: string,
+    @Req() req: any,
   ) {
     return this.attachmentsService.remove(
       attachmentId,
+      req.user.userId,
     );
   }
 }

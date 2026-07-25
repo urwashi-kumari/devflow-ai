@@ -25,7 +25,7 @@ export default function DashboardLayout() {
           style={{
             flex: 1,
             padding: "24px",
-            background: "#f8fafc",
+        background: "linear-gradient(135deg, #f8fafc 0%, #f5f3ff 55%, #fdf2f8 100%)",
           }}
         >
           <Outlet />

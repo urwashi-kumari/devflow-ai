@@ -1,5 +1,6 @@
 import {
   Injectable,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { unlink } from 'fs/promises';
@@ -67,7 +68,7 @@ export class AttachmentsService {
     });
   }
 
-  async remove(attachmentId: string) {
+  async remove(attachmentId: string, userId: string) {
     const attachment = await this.prisma.attachment.findUnique({
       where: { id: attachmentId },
       include: {
@@ -77,6 +78,10 @@ export class AttachmentsService {
 
     if (!attachment) {
       throw new NotFoundException('Attachment not found');
+    }
+
+    if (attachment.uploaderId !== userId) {
+      throw new ForbiddenException('Only the uploader can delete this attachment');
     }
 
     await this.activityService.logActivity(
