@@ -2,10 +2,16 @@ import CommentItem from "./CommentItem";
 
 interface CommentListProps {
   comments: any[];
+  currentUserId?: string;
+  onUpdate?: (commentId: string, content: string) => Promise<void>;
+  onDelete?: (commentId: string) => Promise<void>;
 }
 
 export default function CommentList({
   comments,
+  currentUserId,
+  onUpdate,
+  onDelete,
 }: CommentListProps) {
   if (comments.length === 0) {
     return (
@@ -21,6 +27,9 @@ export default function CommentList({
         <CommentItem
           key={comment.id}
           comment={comment}
+          canManage={comment.authorId === currentUserId}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
         />
       ))}
     </div>

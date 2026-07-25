@@ -7,6 +7,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import DashboardPage from "../pages/DashboardPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
+import TaskDetailsPage from "../pages/TaskDetailsPage";
 import TasksPage from "../pages/TasksPage";
 import NotificationsPage from "../pages/NotificationsPage";
 import SettingsPage from "../pages/SettingsPage";
@@ -66,6 +67,10 @@ export const router = createBrowserRouter([
       {
         path: "/tasks",
         element: <TasksPage />,
+      },
+      {
+        path: "/tasks/:id",
+        element: <TaskDetailsPage />,
       },
       {
         path: "/notifications",

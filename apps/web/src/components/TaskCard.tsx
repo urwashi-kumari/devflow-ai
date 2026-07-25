@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 
 import useComments from "../hooks/useComments";
@@ -77,6 +78,7 @@ export default function TaskCard({
         </span>
 
         <div className="flex gap-3">
+          <Link to={`/tasks/${task.id}`} className="rounded bg-slate-700 px-4 py-2 text-white hover:bg-slate-800">Details</Link>
           <button
             onClick={() => onEdit(task)}
             className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
