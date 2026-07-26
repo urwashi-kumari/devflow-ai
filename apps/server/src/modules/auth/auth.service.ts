@@ -18,7 +18,8 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { name, email, password } = registerDto;
+    const { name, password } = registerDto;
+    const email = registerDto.email.trim().toLowerCase();
 
     const existingUser = await this.usersService.findByEmail(email);
 
@@ -51,17 +52,12 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
+    const { password } = loginDto;
+    const email = loginDto.email.trim().toLowerCase();
 
     const user = await this.usersService.findByEmail(email);
 
-    console.log('================ LOGIN DEBUG ================');
-    console.log('Entered Email:', email);
-    console.log('Entered Password:', password);
-    console.log('User Found:', user);
-
     if (!user) {
-      console.log('❌ User not found');
       throw new UnauthorizedException('Invalid email or password');
     }
 
@@ -69,10 +65,6 @@ export class AuthService {
       password,
       user.password,
     );
-
-    console.log('Stored Hash:', user.password);
-    console.log('Password Match:', isPasswordValid);
-    console.log('=============================================');
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
@@ -109,6 +101,7 @@ export class AuthService {
     profile: { name?: string; email?: string },
   ) {
     if (profile.email) {
+      profile.email = profile.email.trim().toLowerCase();
       const existingUser = await this.usersService.findByEmail(profile.email);
       if (existingUser && existingUser.id !== userId) {
         throw new BadRequestException('Email already exists');

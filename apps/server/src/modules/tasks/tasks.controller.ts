@@ -11,13 +11,13 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto/update-task.dto';
-import { TaskParamDto } from './dto/task-param.dto/task-param.dto';
 import { TaskFilterDto } from './dto/task-filter.dto';
 
 @ApiTags('Tasks')
@@ -47,37 +47,62 @@ export class TasksController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get task by ID' })
-  getTaskById(@Param() params: TaskParamDto) {
-    return this.tasksService.getTaskById(params.id);
+  @ApiParam({
+    name: 'id',
+    description: 'Task ID',
+    example: 'cmrz9tgs0000elqfckoq57gtn',
+  })
+  getTaskById(@Param('id') id: string) {
+    return this.tasksService.getTaskById(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a task' })
+  @ApiParam({
+    name: 'id',
+    description: 'Task ID',
+    example: 'cmrz9tgs0000elqfckoq57gtn',
+  })
   updateTask(
-    @Param() params: TaskParamDto,
+    @Param('id') id: string,
     @Body() dto: UpdateTaskDto,
   ) {
-    return this.tasksService.updateTask(params.id, dto);
+    return this.tasksService.updateTask(id, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a task' })
-  deleteTask(@Param() params: TaskParamDto) {
-    return this.tasksService.deleteTask(params.id);
+  @ApiParam({
+    name: 'id',
+    description: 'Task ID',
+    example: 'cmrz9tgs0000elqfckoq57gtn',
+  })
+  deleteTask(@Param('id') id: string) {
+    return this.tasksService.deleteTask(id);
   }
 
   @Patch(':id/assign')
   @ApiOperation({ summary: 'Assign a task to a user' })
+  @ApiParam({
+    name: 'id',
+    description: 'Task ID',
+    example: 'cmrz9tgs0000elqfckoq57gtn',
+  })
   assignTask(
-    @Param() params: TaskParamDto,
+    @Param('id') id: string,
     @Body('userId') userId: string,
   ) {
-    return this.tasksService.assignTask(params.id, userId);
+    return this.tasksService.assignTask(id, userId);
   }
 
   @Patch(':id/unassign')
   @ApiOperation({ summary: 'Unassign a task' })
-  unassignTask(@Param() params: TaskParamDto) {
-    return this.tasksService.unassignTask(params.id);
+  @ApiParam({
+    name: 'id',
+    description: 'Task ID',
+    example: 'cmrz9tgs0000elqfckoq57gtn',
+  })
+  unassignTask(@Param('id') id: string) {
+    return this.tasksService.unassignTask(id);
   }
 }

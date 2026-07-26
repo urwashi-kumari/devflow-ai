@@ -19,4 +19,4 @@ RUN pnpm --filter server build
 
 EXPOSE 3000
 
-CMD ["pnpm", "--filter", "server", "start:prod"]
+CMD ["sh", "-c", "pnpm --filter server exec prisma migrate deploy && pnpm --filter server start:prod"]

@@ -7,7 +7,7 @@ export class UpdateProfileDto {
   @IsNotEmpty()
   name?: string;
 
-  @ApiPropertyOptional({ example: 'urwashi@gmail.com' })
+  @ApiPropertyOptional({ example: 'user@example.com' })
   @IsOptional()
   @IsEmail()
   email?: string;
