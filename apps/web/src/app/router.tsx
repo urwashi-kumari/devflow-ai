@@ -1,9 +1,7 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
-import App from "../App";
 import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
-
 import DashboardPage from "../pages/DashboardPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
@@ -22,7 +20,7 @@ import PublicRoute from "../components/PublicRoute";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <Navigate to="/dashboard" replace />,
   },
   {
     element: <AuthLayout />,
