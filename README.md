@@ -1,223 +1,629 @@
-# DevFlow AI
+# 🚀 DevFlow AI
 
-> A modern project-management workspace for teams that want a clearer way to plan work, collaborate on tasks, and ship consistently.
+> An AI-powered project management workspace designed to help teams plan, collaborate, track tasks, and deliver projects efficiently.
 
-DevFlow AI is a full-stack application for managing projects, tasks, team members, comments, dependencies, notifications, and task attachments. It combines a React dashboard with a modular NestJS API and PostgreSQL database.
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-blue?logo=typescript)
+![NestJS](https://img.shields.io/badge/NestJS-red?logo=nestjs)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-black?logo=prisma)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue?logo=postgresql)
+![Vercel](https://img.shields.io/badge/Frontend-Vercel-black?logo=vercel)
+![Render](https://img.shields.io/badge/Backend-Render-purple)
 
-## Highlights
+---
 
-- Colorful, responsive workspace dashboard with project and personal task metrics
-- Secure JWT authentication with profile editing and password changes
-- Project creation, editing, member management, and Git branch metadata
-- Task filtering, assignment, priorities, statuses, due dates, and dependencies
-- Task comments and activity history
-- Attachment uploads with file metadata, downloads, and uploader-only deletion
-- In-app notifications
-- Swagger API documentation at `/api`
+# 🌐 Live Demo
 
-## Tech Stack
+## Frontend
+
+🔗 https://devflow-ai-web-sable.vercel.app
+
+## Backend API
+
+🔗 https://devflow-api-q2p4.onrender.com
+
+## Swagger API Documentation
+
+🔗 https://devflow-api-q2p4.onrender.com/api
+
+---
+
+# 📌 About Project
+
+DevFlow AI is a full-stack AI-ready project management platform built to simplify project planning, task tracking, and team collaboration.
+
+The application provides secure authentication, project management, task workflows, comments, notifications, attachments, and a responsive dashboard.
+
+The system follows a scalable full-stack architecture using:
+
+- React + TypeScript for frontend
+- NestJS for backend API
+- Prisma ORM for database management
+- PostgreSQL for persistent storage
+
+---
+
+# ✨ Key Features
+
+## 🔐 Authentication
+
+- User Registration
+- Secure Login
+- JWT Authentication
+- Protected Routes
+- Profile Management
+- Password Update
+
+## 📁 Project Management
+
+- Create Projects
+- Update Projects
+- Delete Projects
+- Manage Project Information
+- Track Project Progress
+
+## ✅ Task Management
+
+- Create and Manage Tasks
+- Assign Tasks
+- Task Priority
+- Task Status
+- Due Dates
+- Task Dependencies
+
+## 🤝 Collaboration
+
+- Task Comments
+- Activity Tracking
+- Notifications
+- File Attachments
+
+## ⚡ Additional Features
+
+- Responsive Dashboard
+- Swagger API Documentation
+- Prisma Database Management
+- Docker Support
+- Production Deployment
+- AI Integration Ready
+
+---
+
+# 🛠 Technology Stack
 
 | Layer | Technology |
-| --- | --- |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS, React Router |
-| Data fetching | Axios, TanStack Query |
-| Backend | NestJS, TypeScript, Prisma |
+|---|---|
+| Frontend | React 19, TypeScript, Vite |
+| Styling | Tailwind CSS |
+| Routing | React Router |
+| Data Fetching | Axios, TanStack Query |
+| Backend | NestJS |
 | Database | PostgreSQL |
+| ORM | Prisma |
 | Authentication | JWT, Passport, bcrypt |
-| API docs | Swagger / OpenAPI |
-| Local containers | Docker, Docker Compose |
+| API Documentation | Swagger |
+| Deployment | Vercel + Render |
 
-## Project Structure
+---
+
+# 🏗 System Architecture
+
+```mermaid
+graph TD
+
+User[👤 User]
+
+Frontend[🌐 React Frontend
+TypeScript + Vite + Tailwind]
+
+Backend[⚙️ NestJS Backend API]
+
+Auth[🔐 JWT Authentication]
+
+Prisma[🟣 Prisma ORM]
+
+Database[(🐘 PostgreSQL Database)]
+
+Storage[📁 File Storage]
+
+AI[🤖 AI Integration]
+
+User --> Frontend
+
+Frontend --> Backend
+
+Backend --> Auth
+
+Backend --> Prisma
+
+Prisma --> Database
+
+Backend --> Storage
+
+Backend --> AI
+```
+
+---
+
+# 🔄 Application Workflow
+
+```mermaid
+flowchart LR
+
+A[User Opens Application]
+
+B[Register/Login]
+
+C[JWT Token Generated]
+
+D[Dashboard Access]
+
+E[Create Project]
+
+F[Manage Tasks]
+
+G[Comments & Notifications]
+
+A --> B
+
+B --> C
+
+C --> D
+
+D --> E
+
+E --> F
+
+F --> G
+```
+
+---
+
+# 📂 Project Structure
 
 ```text
 devflow-ai/
+
 ├── apps/
-│   ├── server/             # NestJS API and Prisma schema
-│   └── web/                # React + Vite frontend
-├── packages/               # Shared workspace packages
-├── Dockerfile              # Production API image
-├── docker-compose.yml      # Local PostgreSQL + API stack
-├── render.yaml             # Render API + PostgreSQL blueprint
-└── vercel.json             # Vercel frontend configuration
+│
+│   ├── web/
+│   │   ├── React Frontend
+│   │   ├── Components
+│   │   └── Pages
+│   │
+│   └── server/
+│       ├── NestJS API
+│       ├── Prisma
+│       └── Database Models
+│
+├── packages/
+│
+├── docker-compose.yml
+├── render.yaml
+├── vercel.json
+└── README.md
 ```
 
-## Prerequisites
+---
 
-- Node.js 22 or newer
-- pnpm 11 or newer (`corepack enable`)
-- PostgreSQL 16+ for local database development, or Docker Desktop
+# 🔐 Authentication Flow
 
-## Local Development
+```mermaid
+sequenceDiagram
 
-### 1. Install dependencies
+User->>Frontend: Enter Email & Password
+
+Frontend->>Backend: POST /auth/login
+
+Backend->>Database: Find User
+
+Database-->>Backend: User Data
+
+Backend->>Backend: bcrypt Password Verification
+
+Backend-->>Frontend: Generate JWT Token
+
+Frontend->>Frontend: Store Token
+
+Frontend->>Backend: Protected API Request
+
+Backend-->>Frontend: Authorized Response
+```
+
+---
+
+# 🗄️ Database Design (ER Diagram)
+
+```mermaid
+erDiagram
+
+USER ||--o{ PROJECT : creates
+
+USER ||--o{ TASK : assigned
+
+PROJECT ||--o{ TASK : contains
+
+TASK ||--o{ COMMENT : has
+
+TASK ||--o{ ATTACHMENT : contains
+
+USER ||--o{ NOTIFICATION : receives
+
+
+USER {
+ string id
+ string name
+ string email
+ string password
+}
+
+PROJECT {
+ string id
+ string title
+ string description
+ string status
+}
+
+TASK {
+ string id
+ string title
+ string priority
+ string status
+ string dueDate
+}
+
+COMMENT {
+ string id
+ string message
+}
+
+ATTACHMENT {
+ string id
+ string filename
+}
+
+NOTIFICATION {
+ string id
+ string message
+}
+```
+
+---
+
+# ☁️ Deployment Architecture
+
+```mermaid
+graph LR
+
+Developer[👨‍💻 Developer]
+
+Github[🐙 GitHub Repository]
+
+Vercel[▲ Vercel Frontend]
+
+Render[🚀 Render Backend]
+
+Database[(🐘 PostgreSQL Database)]
+
+User[🌎 End User]
+
+
+Developer --> Github
+
+Github --> Vercel
+
+Github --> Render
+
+Render --> Database
+
+User --> Vercel
+
+Vercel --> Render
+```
+
+---
+
+# ⚙️ Local Setup
+
+## Requirements
+
+- Node.js 22+
+- pnpm 11+
+- PostgreSQL
+- Docker (Optional)
+
+
+## Clone Repository
+
+```bash
+git clone https://github.com/urwashi-kumari/devflow-ai.git
+
+cd devflow-ai
+```
+
+
+## Install Dependencies
 
 ```bash
 corepack enable
+
 pnpm install
 ```
 
-### 2. Configure the API
+---
 
-Create `apps/server/.env` from the example file:
+# Backend Setup
 
-```bash
-copy apps\server\.env.example apps\server\.env
-```
-
-On macOS/Linux, use:
+Go to server folder:
 
 ```bash
-cp apps/server/.env.example apps/server/.env
+cd apps/server
 ```
 
-Set the following values in `apps/server/.env`:
+Create `.env` file:
 
 ```env
 PORT=3000
-NODE_ENV=development
-DATABASE_URL="postgresql://postgres:your_password@localhost:5432/devflow_ai?schema=public"
-JWT_SECRET="use-a-long-random-secret"
+
+DATABASE_URL="your_database_url"
+
+JWT_SECRET="your_secret_key"
+
 FRONTEND_URL="http://localhost:5173"
-
-# Optional integrations
-GEMINI_API_KEY=""
-MAIL_HOST="smtp.gmail.com"
-MAIL_PORT=587
-MAIL_USER=""
-MAIL_PASS=""
-MAIL_FROM=""
 ```
 
-### 3. Create the database schema
+Generate Prisma Client:
 
 ```bash
-pnpm --filter server exec prisma generate
-pnpm --filter server exec prisma migrate dev
+pnpm prisma generate
 ```
 
-### 4. Start both applications
-
-Use two terminals:
+Run Database Migration:
 
 ```bash
-pnpm --filter server start:dev
+pnpm prisma migrate dev
 ```
+
+Start Backend:
 
 ```bash
-pnpm --filter web dev
+pnpm start:dev
 ```
 
-Open the frontend at [http://localhost:5173](http://localhost:5173). The API runs at [http://localhost:3000](http://localhost:3000), with Swagger documentation at [http://localhost:3000/api](http://localhost:3000/api).
+---
 
-### Frontend environment variable
+# Frontend Setup
 
-The frontend defaults to `http://localhost:3000`. To use another API URL, create `apps/web/.env`:
+Go to frontend:
+
+```bash
+cd apps/web
+```
+
+Create `.env`:
 
 ```env
 VITE_API_URL=http://localhost:3000
 ```
 
-## Docker Development
-
-The Docker Compose stack starts PostgreSQL and the NestJS API. Create a root `.env` file first:
-
-```env
-POSTGRES_PASSWORD=use-a-strong-local-password
-JWT_SECRET=use-a-long-random-secret
-GEMINI_API_KEY=
-MAIL_USER=
-MAIL_PASS=
-MAIL_FROM=
-```
-
-Then run:
+Start Frontend:
 
 ```bash
-docker compose up --build
+pnpm dev
 ```
 
-The database is available on port `5433`; the API is available on port `3000`.
+Frontend:
 
-## Available Commands
-
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Start workspace development scripts with Turbo |
-| `pnpm build` | Build all workspace applications |
-| `pnpm --filter web dev` | Start the Vite frontend |
-| `pnpm --filter web build` | Create a production frontend build |
-| `pnpm --filter server start:dev` | Start the NestJS API with watch mode |
-| `pnpm --filter server build` | Build the NestJS API |
-| `pnpm --filter server exec prisma studio` | Open Prisma Studio |
-| `pnpm --filter server exec prisma migrate dev` | Create and apply a local migration |
-
-## API Overview
-
-All protected requests require:
-
-```http
-Authorization: Bearer <access-token>
+```
+http://localhost:5173
 ```
 
-| Area | Example endpoints |
-| --- | --- |
-| Authentication | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` |
-| Account settings | `PATCH /auth/me`, `PATCH /auth/me/password` |
-| Projects | `GET /projects`, `POST /projects`, `PATCH /projects/:id` |
-| Tasks | `GET /tasks`, `POST /tasks`, `PATCH /tasks/:id` |
-| Attachments | `POST /tasks/:taskId/attachments`, `GET /tasks/:taskId/attachments` |
-| Health check | `GET /health` |
+Backend:
 
-For the full, interactive API reference, start the server and visit `/api`.
+```
+http://localhost:3000
+```
 
-## Deployment: Render + Vercel
+---
 
-### 1. Deploy the API and database on Render
+# 🔌 API Documentation
 
-1. Push this repository to GitHub.
-2. In Render, choose **New → Blueprint** and select the repository.
-3. Render reads `render.yaml`, provisions `devflow-db`, and creates `devflow-api`.
-4. In the Render service environment, set the optional values you use: `GEMINI_API_KEY`, `MAIL_USER`, `MAIL_PASS`, and `MAIL_FROM`.
-5. Copy the resulting API URL, for example `https://devflow-api.onrender.com`.
+## Authentication
 
-### 2. Deploy the frontend on Vercel
+```
+POST   /auth/register
 
-1. In Vercel, import the same GitHub repository.
-2. Vercel uses `vercel.json`; keep the project root as the repository root.
-3. Add the environment variable below before deploying:
+POST   /auth/login
+
+GET    /auth/me
+```
+
+
+## Projects
+
+```
+GET    /projects
+
+POST   /projects
+
+PATCH  /projects/:id
+
+DELETE /projects/:id
+```
+
+
+## Tasks
+
+```
+GET    /tasks
+
+POST   /tasks
+
+PATCH  /tasks/:id
+```
+
+
+## Health Check
+
+```
+GET /health
+```
+
+---
+
+# 🚀 Production Deployment
+
+## Frontend Deployment
+
+Platform:
+
+```
+Vercel
+```
+
+Live URL:
+
+```
+https://devflow-ai-web-sable.vercel.app
+```
+
+Environment Variable:
 
 ```env
-VITE_API_URL=https://devflow-api.onrender.com
+VITE_API_URL=https://devflow-api-q2p4.onrender.com
 ```
 
-4. Deploy and copy the Vercel site URL.
 
-### 3. Connect both services
+---
 
-In Render, set `FRONTEND_URL` to the Vercel URL:
+## Backend Deployment
 
-```env
-FRONTEND_URL=https://your-project.vercel.app
+Platform:
+
+```
+Render
 ```
 
-Redeploy the Render API after updating the variable. The API health check should then be available at:
+Backend URL:
 
-```text
-https://devflow-api.onrender.com/health
+```
+https://devflow-api-q2p4.onrender.com
 ```
 
-## Security Notes
+Database:
 
-- Never commit `.env` files, credentials, API keys, SMTP passwords, or database URLs.
-- Use a long random value for `JWT_SECRET` in production.
-- Rotate any credential that was accidentally committed or shared.
-- Set `FRONTEND_URL` to the exact deployed Vercel domain so CORS only allows your application.
-- Uploaded files are stored on the API filesystem. For durable production storage, move uploads to object storage such as Amazon S3, Cloudflare R2, or Supabase Storage.
+```
+PostgreSQL
+```
 
-## Current Status
+ORM:
 
-DevFlow AI is a working MVP suitable for demos and portfolio deployment. Before using it with production users, add comprehensive automated tests, role-based authorization checks across every API endpoint, rate limiting, monitoring, and external object storage for uploads.
+```
+Prisma
+```
 
-## License
+---
 
-This project is licensed under the [MIT License](LICENSE).
+# 🔒 Security Implementation
+
+- Password hashing using bcrypt
+- JWT based authentication
+- Protected API routes
+- Environment variables secured
+- Database credentials excluded from Git
+- CORS configured
+- Authentication guards implemented
+
+---
+
+# 📸 Screenshots
+
+Add screenshots in:
+
+```
+screenshots/
+```
+
+Recommended:
+
+```
+screenshots/
+
+├── login.png
+
+├── register.png
+
+├── dashboard.png
+
+└── projects.png
+```
+
+---
+
+# ✅ Current Status
+
+✅ Authentication System Completed
+
+✅ User Profile Management
+
+✅ Project Management
+
+✅ Task Management
+
+✅ Comments System
+
+✅ File Attachments
+
+✅ Notifications
+
+✅ PostgreSQL Database
+
+✅ Prisma ORM
+
+✅ Swagger Documentation
+
+✅ Frontend Deployment
+
+✅ Backend Deployment
+
+
+---
+
+# 🔮 Future Improvements
+
+- AI Project Suggestions
+- Smart Task Recommendations
+- Email Verification
+- Forgot Password
+- Role Based Access Control
+- Real-Time Collaboration
+- Advanced Analytics Dashboard
+- Cloud File Storage
+- Team Management
+
+
+---
+
+# 👩‍💻 Author
+
+**Urwashi Kumari**
+
+B.Tech Computer Science Engineering Student
+
+GitHub:
+
+https://github.com/urwashi-kumari
+
+
+---
+
+# ⭐ Support
+
+If you like this project, consider giving it a ⭐ on GitHub.
+
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
